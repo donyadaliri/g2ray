@@ -21,7 +21,8 @@
     "443": {
       "label": "core-node-alpha",
       "protocol": "http",
-      "onAutoForward": "silent"
+      "onAutoForward": "silent",
+      "visibility": "public"
     }
   },
   "forwardPorts": [
