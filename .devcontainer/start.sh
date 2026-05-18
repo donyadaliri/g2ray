@@ -9,6 +9,7 @@ rm -f /tmp/server_ready
 tmux new-session -d -s g2ray "bash -c 'while true; do xray run -c /etc/xray/g2ray.json > /tmp/xray.log 2>&1; sleep 2; done'"
 
 # 3. Quality control loop: Public port + Stability test + Send READY signal
+# [Fixed]: Evaluated CODESPACE_NAME before passing to tmux
 tmux new-window -t g2ray -n monitor "bash -c '
   # a) Wait until Xray successfully binds port 443
   while ! timeout 1 bash -c \"cat < /dev/null > /dev/tcp/127.0.0.1/443\" 2>/dev/null; do 
@@ -16,7 +17,7 @@ tmux new-window -t g2ray -n monitor "bash -c '
   done
   
   # b) Continuous attempt to make the port public on GitHub network
-  until gh codespace ports visibility 443:public -c \$CODESPACE_NAME 2>/dev/null; do 
+  until gh codespace ports visibility 443:public -c ${CODESPACE_NAME} 2>/dev/null; do 
       sleep 2 
   done
   
