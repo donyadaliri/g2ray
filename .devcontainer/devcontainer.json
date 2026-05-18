@@ -1,8 +1,8 @@
 {
-  "name": "swift-hub-a167cc",
+  "name": "core-node-alpha",
   "build": {
     "dockerfile": "Dockerfile",
-    "context": "."
+    "context": ".."
   },
   "features": {
     "ghcr.io/devcontainers/features/common-utils:2": {
@@ -19,7 +19,7 @@
   "postStartCommand": "bash /usr/local/bin/start.sh",
   "portsAttributes": {
     "443": {
-      "label": "swift-hub-a167cc",
+      "label": "core-node-alpha",
       "protocol": "http",
       "onAutoForward": "silent"
     }
