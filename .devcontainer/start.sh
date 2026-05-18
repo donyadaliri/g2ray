@@ -20,7 +20,7 @@ tmux new-window -t g2ray -n monitor "bash -c '
       sleep 2 
   done
   
-  # c) Create actual readiness signal file (everything is smooth and connected now)
+  # c) Create actual readiness signal file
   echo \"READY\" > /tmp/server_ready
   
   # d) Start keepalive loop to keep the container alive
