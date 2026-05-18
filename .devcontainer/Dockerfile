@@ -1,16 +1,19 @@
 FROM debian:bookworm-slim
-COPY setup.sh /tmp/setup.sh
-COPY config.json /etc/xray/g2ray.json
-COPY show-link.sh /usr/local/bin/show-link.sh
-COPY start.sh /usr/local/bin/start.sh
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-       bash curl wget unzip ca-certificates openssl uuid-runtime tmux \
+
+# Install dependencies and Xray core
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl unzip bash tmux ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /etc/xray \
-    && chmod +x /tmp/setup.sh \
-    && /tmp/setup.sh \
-    && rm /tmp/setup.sh \
-    && chmod +x /usr/local/bin/show-link.sh \
-    && chmod +x /usr/local/bin/start.sh
-EXPOSE 443
+    && curl -L -o /tmp/xray.zip https://github.com/XTLS/Xray-core/releases/latest/download/Xray-linux-64.zip \
+    && unzip /tmp/xray.zip -d /usr/local/bin/ \
+    && chmod +x /usr/local/bin/xray \
+    && rm /tmp/xray.zip \
+    && mkdir -p /etc/xray
+
+# Copy scripts and config from the correct paths (Updated for inside .devcontainer)
+COPY .devcontainer/config.json /etc/xray/g2ray.json
+COPY .devcontainer/start.sh /usr/local/bin/start.sh
+COPY .devcontainer/show-link.sh /usr/local/bin/show-link.sh
+
+# Set execution permissions
+RUN chmod +x /usr/local/bin/start.sh /usr/local/bin/show-link.sh
