@@ -6,13 +6,7 @@
   },
   "dns": {
     "servers": [
-      {
-        "address": "https://1.1.1.1/dns-query",
-        "domains": [
-          "geosite:geolocation-!cn"
-        ],
-        "queryStrategy": "UseIP"
-      },
+      "1.1.1.1",
       "8.8.8.8",
       "localhost"
     ],
@@ -27,31 +21,24 @@
       "settings": {
         "clients": [
           {
-            "id": "59d67571-0c30-4ca2-9ffc-025308811220",
+            "id": "a1b2c3d4-e5f6-4a5b-8c9d-e0f1a2b3c4d5",
             "flow": "",
             "level": 0,
-            "email": "user@swift-hub-a167cc"
+            "email": "admin@core-node-alpha"
           }
         ],
         "decryption": "none"
       },
       "streamSettings": {
-        "network": "xhttp",
+        "network": "ws",
         "security": "none",
-        "xhttpSettings": {
-          "mode": "packet-up",
-          "path": "/",
-          "maxUploadSize": 1000000,
-          "maxConcurrentUploads": 10
+        "wsSettings": {
+          "path": "/"
         }
       },
       "sniffing": {
         "enabled": true,
-        "destOverride": [
-          "http",
-          "tls",
-          "quic"
-        ],
+        "destOverride": ["http", "tls", "quic"],
         "routeOnly": false
       }
     }
@@ -79,36 +66,102 @@
     "rules": [
       {
         "type": "field",
-        "ip": [
-          "geoip:private"
-        ],
+        "ip": ["geoip:private"],
         "outboundTag": "block"
       },
       {
         "type": "field",
-        "protocol": [
-          "bittorrent"
-        ],
+        "protocol": ["bittorrent"],
         "outboundTag": "block"
       },
       {
         "type": "field",
-        "domain": [
-          "geosite:category-ads-all"
-        ],
+        "domain": ["geosite:category-ads-all"],
         "outboundTag": "block"
       }
     ]
+  }
+}{
+  "log": {
+    "loglevel": "warning",
+    "access": "none",
+    "error": "/tmp/xray-error.log"
   },
-  "policy": {
-    "levels": {
-      "0": {
-        "handshake": 4,
-        "connIdle": 300,
-        "uplinkOnly": 2,
-        "downlinkOnly": 5,
-        "bufferSize": 512
+  "dns": {
+    "servers": [
+      "1.1.1.1",
+      "8.8.8.8",
+      "localhost"
+    ],
+    "queryStrategy": "UseIPv4"
+  },
+  "inbounds": [
+    {
+      "tag": "vless-in",
+      "port": 443,
+      "listen": "0.0.0.0",
+      "protocol": "vless",
+      "settings": {
+        "clients": [
+          {
+            "id": "a1b2c3d4-e5f6-4a5b-8c9d-e0f1a2b3c4d5",
+            "flow": "",
+            "level": 0,
+            "email": "admin@core-node-alpha"
+          }
+        ],
+        "decryption": "none"
+      },
+      "streamSettings": {
+        "network": "ws",
+        "security": "none",
+        "wsSettings": {
+          "path": "/"
+        }
+      },
+      "sniffing": {
+        "enabled": true,
+        "destOverride": ["http", "tls", "quic"],
+        "routeOnly": false
       }
     }
+  ],
+  "outbounds": [
+    {
+      "tag": "direct",
+      "protocol": "freedom",
+      "settings": {
+        "domainStrategy": "UseIPv4"
+      }
+    },
+    {
+      "tag": "block",
+      "protocol": "blackhole",
+      "settings": {
+        "response": {
+          "type": "http"
+        }
+      }
+    }
+  ],
+  "routing": {
+    "domainStrategy": "IPIfNonMatch",
+    "rules": [
+      {
+        "type": "field",
+        "ip": ["geoip:private"],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "protocol": ["bittorrent"],
+        "outboundTag": "block"
+      },
+      {
+        "type": "field",
+        "domain": ["geosite:category-ads-all"],
+        "outboundTag": "block"
+      }
+    ]
   }
 }
