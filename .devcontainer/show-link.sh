@@ -9,31 +9,25 @@ fi
 
 SNI="${CODESPACE_NAME}-443.app.github.dev"
 
-# تابع تست اتصال به یک آدرس (IP یا دامنه) روی پورت 443
 test_endpoint() {
     local address=$1
-    local port=443
-    timeout 3 bash -c "echo >/dev/tcp/$address/$port" 2>/dev/null
+    timeout 3 bash -c "echo >/dev/tcp/$address/443" 2>/dev/null
     return $?
 }
 
 echo "[g2ray] Resolving actual Codespace IPs..."
 
-# گرفتن IPهای دامنه با استفاده از curl (بدون نیاز به dig)
 RESPONSE=$(curl -s "https://dns.google/resolve?name=${SNI}&type=A")
 IPS=$(echo "$RESPONSE" | grep -o '"data":"[0-9.]*"' | cut -d'"' -f4 | head -5)
 
-# اگر از آن روش چیزی نگرفت، امتحان کن با dig (اگر نصب باشد)
 if [ -z "$IPS" ]; then
     if command -v dig &> /dev/null; then
         IPS=$(dig +short "$SNI" | grep -E '^[0-9.]+$' | head -5)
     fi
 fi
 
-# ساخت آرایه از همه آدرس‌های احتمالی (اول دامنه، بعد IPها)
 POSSIBLE_ENDPOINTS=("$SNI" ${IPS})
 
-# تست هر کدام و نگه‌داری فقط آدرس‌های پاسخگو
 WORKING_ENDPOINTS=()
 echo "[g2ray] Testing endpoints (may take a few seconds)..."
 for ENDPOINT in "${POSSIBLE_ENDPOINTS[@]}"; do
@@ -46,7 +40,6 @@ for ENDPOINT in "${POSSIBLE_ENDPOINTS[@]}"; do
     fi
 done
 
-# منتظر ماندن برای آمادگی کامل سرور (فایل server_ready)
 if [ ! -f /tmp/server_ready ]; then
     echo -n "⏳ Waiting for server to be fully ready..."
     TIMEOUT=40
@@ -58,7 +51,6 @@ if [ ! -f /tmp/server_ready ]; then
     echo ""
 fi
 
-# نمایش نتایج
 echo ""
 echo "====================================================="
 if [ ${#WORKING_ENDPOINTS[@]} -gt 0 ]; then
@@ -67,10 +59,10 @@ if [ ${#WORKING_ENDPOINTS[@]} -gt 0 ]; then
     echo ""
     for ENDPOINT in "${WORKING_ENDPOINTS[@]}"; do
         if [[ "$ENDPOINT" == *".app.github.dev" ]]; then
-            LINK="vless://${UUID}@${ENDPOINT}:443?encryption=none&security=tls&sni=${ENDPOINT}&host=${ENDPOINT}&fp=chrome&allowInsecure=1&type=xhttp&mode=packet-up&path=%2F#swift-hub-a167cc-[DOMAIN]"
+            LINK="vless://${UUID}@${ENDPOINT}:443?encryption=none&security=tls&sni=${ENDPOINT}&host=${ENDPOINT}&fp=chrome&allowInsecure=1&type=xhttp&mode=packet-up&path=%2F#${ENDPOINT}"
             echo " 🌐 DOMAIN (Best Speed):"
         else
-            LINK="vless://${UUID}@${ENDPOINT}:443?encryption=none&security=tls&sni=${SNI}&host=${SNI}&fp=chrome&allowInsecure=1&type=xhttp&mode=packet-up&path=%2F#swift-hub-a167cc-[${ENDPOINT}]"
+            LINK="vless://${UUID}@${ENDPOINT}:443?encryption=none&security=tls&sni=${SNI}&host=${SNI}&fp=chrome&allowInsecure=1&type=xhttp&mode=packet-up&path=%2F#${SNI}-[${ENDPOINT}]"
             echo " 🌐 IP: $ENDPOINT"
         fi
         echo " $LINK"
