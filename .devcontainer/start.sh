@@ -1,5 +1,5 @@
 #!/bin/bash
-# Node-Alpha Start Script with Auto-Public Token Integration
+# g2ray start script — Real Verification Edition
 
 # 1. Clean up previous sessions and old signals
 tmux kill-session -t g2ray 2>/dev/null || true
@@ -15,20 +15,15 @@ tmux new-window -t g2ray -n monitor "bash -c '
       sleep 1 
   done
   
-  # b) Authenticate GitHub CLI using the Admin Token if provided
-  if [ ! -z \"\$GH_ADMIN_TOKEN\" ]; then
-      echo \"\$GH_ADMIN_TOKEN\" | gh auth login --with-token 2>/dev/null
-  fi
-  
-  # c) Continuous attempt to make the port public on GitHub network
-  until gh codespace ports visibility 443:public -c \${CODESPACE_NAME} 2>/dev/null; do 
+  # b) Continuous attempt to make the port public on GitHub network
+  until gh codespace ports visibility 443:public -c \$CODESPACE_NAME 2>/dev/null; do 
       sleep 2 
   done
   
-  # d) Create actual readiness signal file
-  echo \"READY\" > /tmp/server_ready
+  # c) Create actual readiness signal file (everything is smooth and connected now)
+  echo \"READY\" > /tmp/server_ready   # <---- این خط را اضافه کن
   
-  # e) Start keepalive loop to keep the container alive
+  # d) Start keepalive loop to keep the container alive
   while true; do 
       curl -s --max-time 5 https://github.com/ -o /dev/null
       sleep 180
